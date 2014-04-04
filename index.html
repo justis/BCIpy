@@ -28,37 +28,130 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+          
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>© 2013, 2014 Justis Grant Peters and Sagar Jauhari</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<h1>
+<a name="bcipy" class="anchor" href="#bcipy"><span class="octicon octicon-link"></span></a>BCIpy</h1>
+
+<h4>
+<a name="python-toolkit-to-analyse-eeg-data" class="anchor" href="#python-toolkit-to-analyse-eeg-data"><span class="octicon octicon-link"></span></a>Python toolkit to analyse EEG data</h4>
+
+<p>Code repository for our project in Educational Data Mining class with Dr. Tiffany Barnes, CSC 591-021 Fall 2013 at NCSU. We are analyzing EEG data collected by Mostow and Chang from Project LISTEN.</p>
+
+<h2>
+<a name="using-the-data-processing-pipeline" class="anchor" href="#using-the-data-processing-pipeline"><span class="octicon octicon-link"></span></a>Using the data processing pipeline</h2>
+
+<pre><code>$ python process_eeg.py -h
+usage: process_eeg.py [-h] -i INDIR -o OUTDIR [--interpolate] [--kernelsvm]
+                    [--chartsforpaper]
+
+Process EEG Data.
+
+optional arguments:
+  -h, --help        show this help message and exit
+  -i INDIR          Directory containing raw EEG Files.
+  -o OUTDIR         Path of processed data and reports. New directory with
+                    timestamp will be created inside this folder.
+  --interpolate     Interpolate 512Hz time stamps on 512Hz data having 1Hz
+                    time stamps (raw data available from CMU)
+  --kernelsvm       Perform Kernelized SVC on interpolated raw data
+  --chartsforpaper  Create charts in single page PDF files.
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<h2>
+<a name="processing-timeseries-data-from-cmu" class="anchor" href="#processing-timeseries-data-from-cmu"><span class="octicon octicon-link"></span></a>Processing timeseries data from CMU</h2>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<p>The 512Hz data from CMU has timestamp information, but only at 1Hz resolution. To interpolate these:</p>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<pre>
+python process_series_files.py data/raw/ preprocess/raw/
+</pre>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<h2>
+<a name="using-slicer" class="anchor" href="#using-slicer"><span class="octicon octicon-link"></span></a>Using slicer</h2>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>The Slicer class manages timeseries and extracted features as they relate to tasks from task.xls.</p>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<pre><code># instantiating task slicer
+s = Slicer()
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+if len(sys.argv) &gt; 2:
+        print 'loading raw from list of csvfiles'
+        s.load_series_from_csv('raw', sys.argv[1:])
+else:
+        print 'loading raw from pickle'
+        s.load_series_from_pickle('raw', sys.argv[1])
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+# extract features from 'raw'
+s.extract_filtered_signal()
+s.extract_rolling_median()
+s.extract_rolling_PSD()
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+# fetch task 1, with features
+# Return type is a dict, with task-level features, plus the requested timeseries features
+print s.get_by_task_id(1, features=['raw','raw_rolling_PSD_512', 'raw_rolling_median_128'])
+</code></pre>
+
+<h2>
+<a name="using-python-notebooks" class="anchor" href="#using-python-notebooks"><span class="octicon octicon-link"></span></a>Using Python notebooks</h2>
+
+<pre>
+sudo apt-get install ipython
+git clone git@github.com:sagarjauhari/edm_eeg.git edm_eeg.git
+cd edm_eeg.git
+ipython notebook --pylab-inline
+</pre>
+
+<h2>
+<a name="running-r-scripts" class="anchor" href="#running-r-scripts"><span class="octicon octicon-link"></span></a>Running R scripts</h2>
+
+<p>To run an R script, for example sketchpad.R:</p>
+
+<pre>
+cd dir-with-eeg-data/
+R --vanilla &lt; /path/to/sketchpad.R
+</pre>
+
+<p>It will produce a PDF called Rplots.pdf with a page for each chart produced by the script.</p>
+
+<h2>
+<a name="patching-the-data" class="anchor" href="#patching-the-data"><span class="octicon octicon-link"></span></a>Patching the data</h2>
+
+<p>If you're using eeg_data_set2.zip_, you will want to fix the first line in 20101214171219.1.rawwave.csv to look like this:</p>
+
+<pre>
+%Time,Value
+</pre>
+
+<h1>
+<a name="license-and-copyright" class="anchor" href="#license-and-copyright"><span class="octicon octicon-link"></span></a>License and Copyright</h1>
+
+<p>© 2013, 2014 Justis Grant Peters and Sagar Jauhari</p>
+
+<p>This file is part of BCIpy.</p>
+
+<p>BCIpy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+
+<p>BCIpy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+
+<p>You should have received a copy of the GNU General Public License
+along with BCIpy.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+
+<h1>
+<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h1>
+
+<ul>
+<li>
+<a href="https://code.google.com/p/pyeeg/">PyEEG</a> - Licenced under GPL V3</li>
+</ul>
         </section>
 
         <aside id="sidebar">
